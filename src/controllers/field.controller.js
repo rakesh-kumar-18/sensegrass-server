@@ -16,7 +16,7 @@ export const addField = async (req, res, next) => {
             location,
             cropType,
             areaSize,
-            farmerId: req.user._id, // Assuming req.user contains the authenticated user's details
+            farmerId: req.user._id,
         });
 
         const apiResponse = new ApiResponse(201, field, "Field added successfully");
