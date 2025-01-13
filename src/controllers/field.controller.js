@@ -71,11 +71,47 @@ export const deleteField = async (req, res, next) => {
             throw new ApiError(403, "You are not authorized to delete this field");
         }
 
-        await field.remove();
+        await Field.findOneAndDelete({ _id: id });
 
         const apiResponse = new ApiResponse(200, {}, "Field deleted successfully");
         res.status(200).json(apiResponse);
     } catch (error) {
         next(new ApiError(500, error.message || "Error deleting field"));
+    }
+};
+
+// Fetch all fields for the logged-in farmer
+export const getFieldsByFarmer = async (req, res, next) => {
+    try {
+        const fields = await Field.find({ farmerId: req.user._id });
+
+        if (!fields || fields.length === 0) {
+            throw new ApiError(404, "No fields found for this farmer");
+        }
+
+        const apiResponse = new ApiResponse(200, fields, "Fields fetched successfully");
+        res.status(200).json(apiResponse);
+    } catch (error) {
+        next(new ApiError(500, error.message || "Error fetching fields"));
+    }
+};
+
+// Fetch all fields
+export const getAllFields = async (req, res, next) => {
+    try {
+        if (req.user.role !== "Admin") {
+            throw new ApiError(403, "You are not authorized to access all fields");
+        }
+
+        const fields = await Field.find();
+
+        if (!fields || fields.length === 0) {
+            throw new ApiError(404, "No fields found");
+        }
+
+        const apiResponse = new ApiResponse(200, fields, "All fields fetched successfully");
+        res.status(200).json(apiResponse);
+    } catch (error) {
+        next(new ApiError(500, error.message || "Error fetching fields"));
     }
 };
