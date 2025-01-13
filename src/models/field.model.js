@@ -8,19 +8,12 @@ const fieldSchema = new Schema(
             trim: true,
         },
         location: {
-            latitude: {
-                type: Number,
-                required: true,
-            },
-            longitude: {
-                type: Number,
-                required: true,
-            },
+            type: String,
+            required: true,
         },
         cropType: {
             type: String,
             required: true,
-            enum: ["Wheat", "Rice", "Corn", "Soybean", "Other"],
         },
         areaSize: {
             type: Number,
