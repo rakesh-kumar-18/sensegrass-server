@@ -70,7 +70,9 @@ export const getTransactionHistory = async (req, res, next) => {
         const totalTransactions = await Transaction.countDocuments();
         const transactions = await Transaction.find()
             .skip((page - 1) * limit)
-            .limit(Number(limit));
+            .limit(Number(limit))
+            .populate("userId", "username")
+            .lean();
 
         res.status(200).json({
             currentPage: Number(page),
