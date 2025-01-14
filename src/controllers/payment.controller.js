@@ -64,10 +64,21 @@ export const verifyPayment = async (req, res, next) => {
 
 // Get transaction history
 export const getTransactionHistory = async (req, res, next) => {
+    const { page = 1, limit = 10 } = req.query;
+
     try {
-        const transactions = await Transaction.find();
-        res.status(200).json({ transactions });
+        const totalTransactions = await Transaction.countDocuments();
+        const transactions = await Transaction.find()
+            .skip((page - 1) * limit)
+            .limit(Number(limit));
+
+        res.status(200).json({
+            currentPage: Number(page),
+            totalPages: Math.ceil(totalTransactions / limit),
+            totalTransactions,
+            transactions,
+        });
     } catch (error) {
-        next(new ApiError(500, "Failed to fetch transaction history"));
+        next(new ApiError(500, "Failed to fetch transactions"));
     }
 };
