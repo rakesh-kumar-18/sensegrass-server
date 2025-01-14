@@ -98,3 +98,25 @@ export const logoutUser = async (req, res, next) => {
         next(new ApiError(500, error.message || "Error logging out"));
     }
 };
+
+// Fetch all farmers with pagination
+export const getAllFarmers = async (req, res, next) => {
+    const { page = 1, limit = 10 } = req.query;
+
+    try {
+        const totalFarmers = await User.countDocuments({ role: "Farmer" });
+        const farmers = await User.find({ role: "Farmer" })
+            .skip((page - 1) * limit)
+            .limit(Number(limit))
+            .select("-password");
+
+        res.status(200).json({
+            currentPage: Number(page),
+            totalPages: Math.ceil(totalFarmers / limit),
+            totalFarmers,
+            farmers,
+        });
+    } catch (error) {
+        next(new ApiError(500, "Failed to fetch farmers"));
+    }
+};
