@@ -98,20 +98,21 @@ export const getFieldsByFarmer = async (req, res, next) => {
 
 // Fetch all fields
 export const getAllFields = async (req, res, next) => {
+    const { page = 1, limit = 10 } = req.query;
+
     try {
-        if (req.user.role !== "Admin") {
-            throw new ApiError(403, "You are not authorized to access all fields");
-        }
+        const totalFields = await Field.countDocuments();
+        const fields = await Field.find()
+            .skip((page - 1) * limit)
+            .limit(Number(limit));
 
-        const fields = await Field.find();
-
-        if (!fields || fields.length === 0) {
-            throw new ApiError(404, "No fields found");
-        }
-
-        const apiResponse = new ApiResponse(200, fields, "All fields fetched successfully");
-        res.status(200).json(apiResponse);
+        res.status(200).json({
+            currentPage: Number(page),
+            totalPages: Math.ceil(totalFields / limit),
+            totalFields,
+            fields,
+        });
     } catch (error) {
-        next(new ApiError(500, error.message || "Error fetching fields"));
+        next(new ApiError(500, "Failed to fetch fields"));
     }
 };
