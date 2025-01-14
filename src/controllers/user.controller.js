@@ -1,3 +1,4 @@
+import jwt from "jsonwebtoken";
 import { User } from "../models/user.model.js";
 import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/ApiResponse.js";
@@ -118,5 +119,21 @@ export const getAllFarmers = async (req, res, next) => {
         });
     } catch (error) {
         next(new ApiError(500, "Failed to fetch farmers"));
+    }
+};
+
+// Validate Token
+export const validateToken = async (req, res, next) => {
+    try {
+        const token = req.cookies?.accessToken;
+        if (!token) throw new ApiError(401, "No token provided");
+
+        const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+        const user = await User.findById(decoded._id).select("-password");
+        if (!user) throw new ApiError(401, "Invalid token");
+
+        res.status(200).json({ success: true, data: user });
+    } catch (error) {
+        next(new ApiError(401, error.message || "Unauthorized"));
     }
 };
