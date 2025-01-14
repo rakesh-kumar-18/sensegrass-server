@@ -82,17 +82,22 @@ export const deleteField = async (req, res, next) => {
 
 // Fetch all fields for the logged-in farmer
 export const getFieldsByFarmer = async (req, res, next) => {
+    const { page = 1, limit = 10 } = req.query;
+
     try {
-        const fields = await Field.find({ farmerId: req.user._id });
+        const totalFields = await Field.countDocuments({ farmerId: req.user._id });
+        const fields = await Field.find({ farmerId: req.user._id })
+            .skip((page - 1) * limit)
+            .limit(Number(limit))
+            .lean();
 
-        if (!fields || fields.length === 0) {
-            throw new ApiError(404, "No fields found for this farmer");
-        }
-
-        const apiResponse = new ApiResponse(200, fields, "Fields fetched successfully");
-        res.status(200).json(apiResponse);
+        res.status(200).json({
+            currentPage: Number(page),
+            totalPages: Math.ceil(totalFields / limit),
+            fields,
+        });
     } catch (error) {
-        next(new ApiError(500, error.message || "Error fetching fields"));
+        next(new ApiError(500, "Failed to fetch fields"));
     }
 };
 
