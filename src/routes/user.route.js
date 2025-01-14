@@ -13,6 +13,6 @@ router.route("/register").post(registerUser);
 router.route("/login").post(loginUser);
 
 router.route("/logout").post(isAuthenticated, logoutUser);
-router.get("/farmers", isAuthenticated, getAllFarmers);
+router.route("/farmers").get(isAuthenticated, getAllFarmers);
 
 export default router;
