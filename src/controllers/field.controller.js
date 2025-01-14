@@ -104,7 +104,9 @@ export const getAllFields = async (req, res, next) => {
         const totalFields = await Field.countDocuments();
         const fields = await Field.find()
             .skip((page - 1) * limit)
-            .limit(Number(limit));
+            .limit(Number(limit))
+            .populate("farmerId", "username")
+            .lean();
 
         res.status(200).json({
             currentPage: Number(page),
